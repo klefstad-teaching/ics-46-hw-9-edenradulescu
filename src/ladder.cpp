@@ -1,6 +1,6 @@
 #include "ladder.h"
 
-void error(string msg) {
+void error(string word1, string word2, string msg) {
     cout << "Error trying to find ladder from '" << word1 << "' to '" << word2 << "': " << msg << endl;
 }
 
