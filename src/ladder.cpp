@@ -1,7 +1,7 @@
 #include "ladder.h"
 
 void error(string word1, string word2, string msg) {
-    cout << "Error trying to find ladder from '" << word1 << "' to '" << word2 << "': " << msg << endl;
+    cout << "Error: trying to find ladder from '" << word1 << "' to '" << word2 << "': " << msg << endl;
 }
 
 bool edit_distance_within(const std::string& str1, const std::string& str2, int d) {
@@ -36,26 +36,53 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
 }
 
 bool is_adjacent(const string& word1, const string& word2) {
-    if (word1.length() != word2.length()) {
+    if (word1 == word2) {
+        return true;
+    }
+    
+    int len_diff = abs((int)word1.length() - (int)word2.length());
+    if (len_diff > 1) {
         return false;
     }
     
-    int diff_count = 0;
-    for (size_t i = 0; i < word1.length(); i++) {
-        if (word1[i] != word2[i]) {
-            diff_count++;
-            if (diff_count > 1) {
-                return false;
+    if (word1.length() == word2.length()) {
+        int diff_count = 0;
+        for (size_t i = 0; i < word1.length(); i++) {
+            if (word1[i] != word2[i]) {
+                diff_count++;
+                if (diff_count > 1) {
+                    return false;
+                }
             }
+        }
+        return diff_count <= 1; 
+    }
+    
+    const string& shorter = (word1.length() < word2.length()) ? word1 : word2;
+    const string& longer = (word1.length() < word2.length()) ? word2 : word1;
+    
+    size_t s_idx = 0, l_idx = 0;
+    bool found_diff = false;
+    
+    while (s_idx < shorter.length() && l_idx < longer.length()) {
+        if (shorter[s_idx] != longer[l_idx]) {
+            if (found_diff) {
+                return false; 
+            }
+            found_diff = true;
+            l_idx++; 
+        } else {
+            s_idx++;
+            l_idx++;
         }
     }
     
-    return diff_count == 1;
+    return true;
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
-    if (begin_word.length() != end_word.length()) {
-        error(begin_word, end_word, "Words must be the same length");
+    if (begin_word == end_word) {
+        return {};
     }
     
     set<string> all_words = word_list;
@@ -115,22 +142,19 @@ void print_word_ladder(const vector<string>& ladder) {
         return;
     }
     
-    cout << "Word Ladder (" << ladder.size() << " steps):" << endl;
+    cout << "Word ladder found: ";
     for (size_t i = 0; i < ladder.size(); i++) {
-        cout << (i + 1) << ". " << ladder[i];
+        cout << ladder[i];
         if (i < ladder.size() - 1) {
-            cout << " -> ";
-        }
-        if ((i + 1) % 5 == 0 && i != ladder.size() - 1) {
-            cout << endl;
+            cout << " ";
         }
     }
-    cout << endl;
+    cout << " " << endl;
 }
 
 void verify_word_ladder(const vector<string>& ladder) {
     if (ladder.empty()) {
-        cout << "No ladder to verify." << endl;
+        cout << "Empty ladder is valid" << endl;
         return;
     }
     
@@ -139,6 +163,7 @@ void verify_word_ladder(const vector<string>& ladder) {
         if (!is_adjacent(ladder[i], ladder[i + 1])) {
             cout << "Invalid transition from '" << ladder[i] << "' to '" << ladder[i + 1] << "'" << endl;
             valid = false;
+            break;  
         }
     }
     
