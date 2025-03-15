@@ -81,59 +81,38 @@ bool is_adjacent(const string& word1, const string& word2) {
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
-    if (begin_word == end_word) {
-        return {};
-    }
-    
-    set<string> all_words = word_list;
-    all_words.insert(begin_word);
-    all_words.insert(end_word);
-    
-    queue<vector<string>> paths;
-    set<string> visited;
-    
-    paths.push({begin_word});
-    visited.insert(begin_word);
-    
-    while (!paths.empty()) {
-        vector<string> current_path = paths.front();
-        paths.pop();
-        
-        string current_word = current_path.back();
-        
-        if (current_word == end_word) {
-            return current_path;
-        }
-        
-        for (const string& word : all_words) {
-            if (visited.find(word) == visited.end() && is_adjacent(current_word, word)) {
-                vector<string> new_path = current_path;
-                new_path.push_back(word);
-                paths.push(new_path);
-                visited.insert(word);
-            }
-        }
-    }
-    
-    return {};
+   queue<vector<string>> ladder_queue;
+   set<string> visited;
+   ladder_queue.push({begin_word});
+   visited.insert(begin_word);
+   while (!ladder_queue.empty()) {
+       vector<string> ladder = ladder_queue.front();
+       ladder_queue.pop();
+       string last_word = ladder.back();
+       for (const string& word : word_list) {
+           if (is_adjacent(last_word, word) && visited.find(word) == visited.end()) {
+               vector<string> new_ladder = ladder;
+               new_ladder.push_back(word);
+               visited.insert(word);
+               if (word == end_word) return new_ladder;
+               ladder_queue.push(new_ladder);
+           }
+       }
+   }
+   return {};
 }
 
-void load_words(set<string>& word_list, const string& file_name) {
-    ifstream file(file_name);
-    if (!file) {
-        cerr << "Error: Could not open word list file: " << file_name << endl;
-        exit(1);
-    }
-    
-    string word;
-    while (file >> word) {
-        for (char& c : word) {
-            c = tolower(c);
-        }
-        word_list.insert(word);
-    }
-    
-    file.close();
+void load_words(set<string> & word_list, const string& file_name) {
+   ifstream file(file_name);
+   if (!file) {
+       cerr << "Error: Unable to open file " << file_name << endl;
+       return;
+   }
+   string word;
+   while (file >> word) {
+       word_list.insert(word);
+   }
+   file.close();
 }
 
 void print_word_ladder(const vector<string>& ladder) {
