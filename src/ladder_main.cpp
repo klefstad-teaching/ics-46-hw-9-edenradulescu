@@ -3,7 +3,7 @@
 // int main() {
 //     set<string> word_list;
     
-//     load_words(word_list, "wordlist.txt");
+//     load_words(word_list, "small.txt");
     
 //     string begin_word, end_word;
 //     cout << "Enter starting word: ";
